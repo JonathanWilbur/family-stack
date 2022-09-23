@@ -10,7 +10,9 @@ store.
 This repo has a starter Docker-Compose app for the above purpose, which comes
 pre-configured for automated, compressed, and encrypted backups to Azure Blob
 Storage (archive-tier). Pull requests are welcome for other backup destinations.
-Every weekly backup will send you an email 
+Every weekly backup will send you an email containing the hashes of the
+compressed and encrypted archives, which should help ensure integrity of the
+encrypted backups on whatever object store you use.
 
 Future versions will include support for Synapse, Wekan, CoreDNS, Email
 (Postfix and Dovecot), and Fail2Ban, as well as other services.
