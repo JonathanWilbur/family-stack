@@ -1,0 +1,12 @@
+seed_directory.sh
+hashes.txt
+.env
+*.pem
+*.crt
+*.key
+*.pfx
+*.p12
+*.tar.gz
+*.tar.gz.gpg
+backups/*
+!backups/.gitkeep

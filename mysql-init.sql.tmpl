@@ -1,0 +1,11 @@
+SET GLOBAL max_allowed_packet = 1024 * 1024 * 256;
+
+CREATE DATABASE directory;
+CREATE USER 'directory_user'@'%' IDENTIFIED VIA 'mysql_native_password' BY 'DIRECTORY_USER_PASSWORD';
+GRANT ALL PRIVILEGES ON directory.* TO 'directory_user'@'%';
+
+CREATE DATABASE owncloud;
+CREATE USER 'owncloud_user'@'%' IDENTIFIED BY 'OWNCLOUD_USER_PASSWORD';
+GRANT ALL PRIVILEGES ON owncloud.* TO 'owncloud_user'@'%';
+
+FLUSH PRIVILEGES;

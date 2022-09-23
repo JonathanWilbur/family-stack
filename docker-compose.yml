@@ -1,0 +1,369 @@
+version: "3"
+
+# networks:
+#   frontend:
+#     external: true
+#   datalayer:
+#     external: true
+
+volumes:
+  files:
+    driver: local
+  mysql:
+    driver: local
+  postgres:
+    driver: local
+  redis:
+    driver: local
+  caddy:
+    driver: local
+
+services:
+
+  http:
+    image: caddy:alpine
+    container_name: revproxy
+    restart: always
+    # networks:
+    #   - frontend
+    ports:
+      - 443:4443
+      - 80:8080
+    volumes:
+      - $PWD/Caddyfile:/etc/caddy/Caddyfile
+      # You have to define a persistent volume so that the Let's Encrypt
+      # certificates are not deleted between restarts. I got rate-limited by
+      # Let's Encrypt, meaning that I have to wait 24 hours to get a new
+      # certificate! Don't let this happen to you!
+      - caddy:/data
+
+  # Encryption will not be used with remote file storage, because file names
+  # thumbnails, and too many other sensitive metadata are not encrypted.
+  owncloud:
+    image: owncloud/server:10.10
+    container_name: owncloud_server
+    restart: always
+    # ports:
+    #   - ${HTTP_PORT}:8080
+    depends_on:
+      - mariadb
+      - redis
+    environment:
+      OWNCLOUD_DOMAIN: ${OWNCLOUD_DOMAIN}
+      OWNCLOUD_DB_TYPE: mysql
+      OWNCLOUD_DB_NAME: owncloud
+      OWNCLOUD_DB_USERNAME: owncloud_user
+      OWNCLOUD_DB_PASSWORD: ${OWNCLOUD_DB_PASSWORD}
+      OWNCLOUD_DB_HOST: mariadb
+      OWNCLOUD_ADMIN_USERNAME: ${ADMIN_USERNAME}
+      OWNCLOUD_ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      OWNCLOUD_MYSQL_UTF8MB4: "true"
+      OWNCLOUD_REDIS_ENABLED: "true"
+      OWNCLOUD_REDIS_HOST: redis
+    healthcheck:
+      test: ["CMD", "/usr/bin/healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    # networks:
+    #   - frontend
+    #   - datalayer
+    volumes:
+      - files:/mnt/data
+
+  directory:
+    image: ghcr.io/wildboar-software/meerkat-dsa:1.2.7
+    environment:
+      # What appears in this section overrides anything in .env.
+      DATABASE_URL: mysql://directory_user:${DIRECTORY_DB_PASSWORD}@mariadb:3306/directory
+      # MEERKAT_INIT_JS: /data/init.mjs
+      LANG: en
+      # MEERKAT_ADMINISTRATOR_EMAIL_PUBLIC
+      # MEERKAT_ATTR_CERT_CHAIN_FILE
+      MEERKAT_BIND_MIN_SLEEP_MS: 100
+      MEERKAT_BIND_SLEEP_RANGE_MS: 1000
+      # MEERKAT_BULK_INSERT_MODE
+      # MEERKAT_CLIENT_CERT_ENGINE
+      # MEERKAT_CHAINING_CHECK_SIG
+      # MEERKAT_CHAINING_SIGN_REQUESTS
+      # MEERKAT_CHAINING_TLS_OPTIONAL
+      # MEERKAT_DEFAULT_ENTRY_TTL
+      # MEERKAT_ECDH_CURVES
+      MEERKAT_ENABLE_DAP: "1"
+      MEERKAT_ENABLE_DOP: "0"
+      MEERKAT_ENABLE_DSP: "0"
+      MEERKAT_ENTRIES_PER_SUBORDINATES_PAGE: "3"
+      MEERKAT_FORBID_ANONYMOUS_BIND: "0"
+      # MEERKAT_HONOR_CIPHER_ORDER
+      # MEERKAT_IDM_BUFFER_SIZE
+      MEERKAT_IDM_PORT: "4632"
+      MEERKAT_IDMS_PORT: "44632"
+      # MEERKAT_INIT_JS
+      # MEERKAT_LCR_PARALLELISM
+      # MEERKAT_LDAP_BUFFER_SIZE
+      MEERKAT_LDAP_PORT: "1389"
+      MEERKAT_LDAPS_PORT: "1636"
+      # MEERKAT_LOCAL_QUALIFIER_POINTS_FOR_USING_SSL3
+      # MEERKAT_LOCAL_QUALIFIER_POINTS_FOR_USING_STARTTLS
+      # MEERKAT_LOCAL_QUALIFIER_POINTS_FOR_USING_TLS
+      # MEERKAT_LOCAL_QUALIFIER_POINTS_FOR_USING_TLS_1_0
+      # MEERKAT_LOCAL_QUALIFIER_POINTS_FOR_USING_TLS_1_1
+      # MEERKAT_LOCAL_QUALIFIER_POINTS_FOR_USING_TLS_1_2
+      # MEERKAT_LOCAL_QUALIFIER_POINTS_FOR_USING_TLS_1_3
+      # MEERKAT_LOG_FILE
+      # MEERKAT_LOG_FILE_MAX_FILES
+      # MEERKAT_LOG_FILE_MAX_SIZE
+      # MEERKAT_LOG_HTTP
+      # MEERKAT_LOG_JSON
+      MEERKAT_LOG_LEVEL: debug
+      # MEERKAT_LOG_TAILABLE
+      # MEERKAT_LOG_ZIP
+      # MEERKAT_LOOKUP_UNCERT_STRONG_AUTH
+      # MEERKAT_MAX_CONCURRENT_OPERATIONS_PER_CONNECTION
+      # MEERKAT_MAX_CONNECTIONS
+      # MEERKAT_MAX_CONNECTIONS_PER_ADDRESS
+      # MEERKAT_MAX_IDM_PDU_SIZE
+      # MEERKAT_MAX_IDM_SEGMENTS
+      # MEERKAT_MAX_PRE_BIND_REQUESTS
+      # MEERKAT_MIN_AUTH_LEVEL_FOR_CHAINING
+      # MEERKAT_MIN_AUTH_LEVEL_FOR_OB
+      # MEERKAT_MIN_AUTH_LOCAL_QUALIFIER_FOR_CHAINING
+      # MEERKAT_MIN_AUTH_LOCAL_QUALIFIER_FOR_OB
+      # MEERKAT_MIN_TRANSFER_SPEED_BYTES_PER_MINUTE
+      # MEERKAT_MY_ACCESS_POINT_NSAPS
+      # MEERKAT_NO_COLOR
+      # MEERKAT_NO_CONSOLE
+      # MEERKAT_NO_TIMESTAMP
+      # MEERKAT_OB_AUTO_ACCEPT
+      # MEERKAT_OPEN_TOP_LEVEL
+      # MEERKAT_PRIVATE_KEY_ENGINE
+      # MEERKAT_PROHIBIT_CHAINING
+      # MEERKAT_SCR_PARALLELISM
+      # MEERKAT_SCVP_ATTR_CERT_CHECKS
+      # MEERKAT_SCVP_ATTR_CERT_WANT_BACKS
+      # MEERKAT_SCVP_CACHED_RESPONSE
+      # MEERKAT_SCVP_DISCLOSE_AE_TITLE
+      # MEERKAT_SCVP_FULL_REQUEST_IN_RESPONSE
+      # MEERKAT_SCVP_HASH_ALGORITHM
+      # MEERKAT_SCVP_INHIBIT_ANY_POLICY
+      # MEERKAT_SCVP_INHIBIT_POLICY_MAPPING
+      # MEERKAT_SCVP_PROTECT_RESPONSE
+      # MEERKAT_SCVP_PUBLIC_KEY_CERT_CHECKS
+      # MEERKAT_SCVP_PUBLIC_KEY_CERT_WANT_BACKS
+      # MEERKAT_SCVP_REQUESTOR_TEXT
+      # MEERKAT_SCVP_REQUIRE_EXPLICIT_POLICY
+      # MEERKAT_SCVP_RESPONSE_VALIDATION_POLICY_BY_REF
+      # MEERKAT_SCVP_SIGNATURE_ALGORITHM
+      # MEERKAT_SCVP_URL
+      # MEERKAT_SCVP_VALIDATION_ALGORITHM_ID
+      # MEERKAT_SCVP_VALIDATION_POLICY_REF_ID
+      # MEERKAT_SENTINEL_DOMAIN
+      # MEERKAT_SIGNING_ACCEPTABLE_CERT_POLICIES
+      # MEERKAT_SIGNING_BIND_ACCEPTABLE_CERT_POLICIES
+      # MEERKAT_SIGNING_BIND_CRL_DP_ATTEMPTS_PER_CERT
+      # MEERKAT_SIGNING_BIND_MAX_ENDPOINTS_PER_CRL_DP
+      # MEERKAT_SIGNING_BIND_OCSP_CHECKINESS
+      # MEERKAT_SIGNING_BIND_OCSP_MAX_REQUESTS_PER_CERT
+      # MEERKAT_SIGNING_BIND_OCSP_SIGN_REQUESTS
+      # MEERKAT_SIGNING_BIND_OCSP_TIMEOUT
+      # MEERKAT_SIGNING_BIND_OCSP_UNKNOWN_IS_FAILURE
+      # MEERKAT_SIGNING_BIND_REMOTE_CRL_CACHE_TTL
+      # MEERKAT_SIGNING_BIND_REMOTE_CRL_CHECKINESS
+      # MEERKAT_SIGNING_BIND_REMOTE_CRL_SIZE_LIMIT
+      # MEERKAT_SIGNING_BIND_REMOTE_CRL_SUPPORTED_PROTOCOLS
+      # MEERKAT_SIGNING_BIND_REMOTE_CRL_TIMEOUT
+      # MEERKAT_SIGNING_BIND_TOLERATE_UNAVAILABLE_REMOTE_CRL
+      MEERKAT_SIGNING_CA_FILE: /data/cert.pem
+      MEERKAT_SIGNING_CERTS_CHAIN_FILE: /data/cert.pem
+      # MEERKAT_SIGNING_CRL_DP_ATTEMPTS_PER_CERT
+      # MEERKAT_SIGNING_CRL_FILE
+      # MEERKAT_SIGNING_DISABLE_VERIFICATION
+      # MEERKAT_SIGNING_ERRORS_MIN_AUTH_LEVEL
+      # MEERKAT_SIGNING_ERRORS_MIN_AUTH_LOCAL_QUALIFIER
+      # MEERKAT_SIGNING_ERRORS_MIN_AUTH_SIGNED
+      MEERKAT_SIGNING_KEY_FILE: /data/key.pem
+      # MEERKAT_SIGNING_MAX_ENDPOINTS_PER_CRL_DP
+      # MEERKAT_SIGNING_MIN_AUTH_LEVELBack
+      # MEERKAT_SIGNING_MIN_AUTH_LOCAL_QUALIFIER
+      # MEERKAT_SIGNING_MIN_AUTH_SIGNED
+      # MEERKAT_SIGNING_OCSP_CHECKINESS
+      # MEERKAT_SIGNING_OCSP_MAX_REQUESTS_PER_CERT
+      # MEERKAT_SIGNING_OCSP_REPLAY_WINDOW
+      # MEERKAT_SIGNING_OCSP_RESPONSE_SIZE_LIMIT
+      # MEERKAT_SIGNING_OCSP_SIGN_REQUESTS
+      # MEERKAT_SIGNING_OCSP_TIMEOUT
+      # MEERKAT_SIGNING_OCSP_UNKNOWN_IS_FAILURE
+      # MEERKAT_SIGNING_PERMITTED_ALGORITHMS
+      # MEERKAT_SIGNING_REMOTE_CRL_CACHE_TTL
+      # MEERKAT_SIGNING_REMOTE_CRL_CHECKINESS
+      # MEERKAT_SIGNING_REMOTE_CRL_SIZE_LIMIT
+      # MEERKAT_SIGNING_REMOTE_CRL_SUPPORTED_PROTOCOLS
+      # MEERKAT_SIGNING_REMOTE_CRL_TIMEOUT
+      # MEERKAT_SIGNING_REQUIRED_FOR_CHAINING
+      # MEERKAT_SIGNING_REQUIRED_FOR_OB
+      # MEERKAT_SIGNING_TOLERATE_UNAVAILABLE_REMOTE_CRL
+      # MEERKAT_TCP_NO_DELAY
+      # MEERKAT_TCP_TIMEOUT_IN_SECONDS
+      # MEERKAT_TLS_ANSWER_OCSP_REQUESTS
+      MEERKAT_TLS_CA_FILE: /data/cert.pem
+      MEERKAT_TLS_CERT_FILE: /data/cert.pem
+      # MEERKAT_TLS_CIPHERS
+      # MEERKAT_TLS_CLIENT_CERT_AUTH
+      # MEERKAT_TLS_CRL_FILE
+      # MEERKAT_TLS_DH_PARAM_FILE
+      # MEERKAT_TLS_HANDSHAKE_TIMEOUT_IN_SECONDS
+      MEERKAT_TLS_KEY_FILE: /data/key.pem
+      # MEERKAT_TLS_KEY_PASSPHRASE
+      # MEERKAT_TLS_MAX_VERSION
+      # MEERKAT_TLS_MIN_VERSION
+      # MEERKAT_TLS_OCSP_CHECKINESS
+      # MEERKAT_TLS_OCSP_MAX_REQUESTS_PER_CERT
+      # MEERKAT_TLS_OCSP_REPLAY_WINDOW
+      # MEERKAT_TLS_OCSP_RESPONSE_SIZE_LIMIT
+      # MEERKAT_TLS_OCSP_SIGN_REQUESTS
+      # MEERKAT_TLS_OCSP_TIMEOUT
+      # MEERKAT_TLS_OCSP_UNKNOWN_IS_FAILURE
+      # MEERKAT_TLS_PFX_FILE
+      # MEERKAT_TLS_REJECT_UNAUTHORIZED_CLIENTS
+      # MEERKAT_TLS_REJECT_UNAUTHORIZED_SERVERS
+      # MEERKAT_TLS_REQUEST_OCSP
+      MEERKAT_TLS_SESSION_TIMEOUT_IN_SECONDS: "3600"
+      # MEERKAT_TLS_SIG_ALGS
+      MEERKAT_TRANSCODE_DISTINGUISHED_VALUES_TO_DER: "1"
+      MEERKAT_TRANSCODE_VALUES_TO_DER: "1"
+      # MEERKAT_TRUST_ANCHORS_FILE
+      # MEERKAT_USE_DATABASE_WHEN_THERE_ARE_X_SUBORDINATES
+      # MEERKAT_VENDOR_NAME
+      # MEERKAT_VENDOR_VERSION
+      MEERKAT_WEB_ADMIN_AUTH_USERNAME: "${DIRECTORY_ADMIN_AUTH_USERNAME}"
+      MEERKAT_WEB_ADMIN_AUTH_PASSWORD: "${DIRECTORY_ADMIN_AUTH_PASSWORD}"
+      MEERKAT_WEB_ADMIN_AUTH_REALM: "W"
+      MEERKAT_WEB_ADMIN_PORT: "18080"
+      MEERKAT_WEB_ADMIN_USE_TLS: "1"
+      NODE_ENV: production
+    hostname: 'meerkat'
+    labels:
+      author: Wildboar Software
+      app: meerkat
+      version: "1.2.5"
+    # networks:
+    #   - datalayer
+    ports:
+      - '1389:1389/tcp' # LDAP TCP Port
+      - '4632:4632/tcp' # IDM Socket
+      - '18080:18080/tcp' # Web administration console
+    volumes:
+      - type: bind
+        source: ./meerkat
+        target: /data
+        read_only: true
+    depends_on:
+      init-db:
+        condition: service_completed_successfully
+
+  init-db:
+    image: ghcr.io/wildboar-software/meerkat-dsa:1.2.5
+    environment:
+      DATABASE_URL: mysql://directory_user:${DIRECTORY_DB_PASSWORD}@mariadb:3306/directory
+    entrypoint: /usr/local/bin/npx
+    command:
+      - prisma
+      - migrate
+      - deploy
+      - --schema=/srv/meerkat/prisma/schema.prisma
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
+  mariadb:
+    image: mariadb:10.6 # minimum required ownCloud version is 10.9
+    container_name: mariadb
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+    command: ["--max-allowed-packet=512M", "--innodb-log-file-size=64M"]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-u", "owncloud_user", "--password=${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # networks:
+    #   - datalayer
+    volumes:
+      - mysql:/var/lib/mysql
+      - $PWD/mysql-init.sql:/docker-entrypoint-initdb.d/dbinit.sql
+
+  redis:
+    image: redis:6
+    container_name: owncloud_redis
+    restart: always
+    command: ["--databases", "1"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # networks:
+    #   - datalayer
+    volumes:
+      - redis:/data
+
+  # synapse:
+  #   # command: generate
+  #   image: docker.io/matrixdotorg/synapse:latest
+  #   # Since synapse does not retry to connect to the database, restart upon
+  #   # failure
+  #   restart: unless-stopped
+  #   # See the readme for a full documentation of the environment settings
+  #   environment:
+  #     - SYNAPSE_CONFIG_PATH=/data/homeserver.yaml
+  #     - SYNAPSE_REPORT_STATS=no
+  #   volumes:
+  #     # You may either store all the files in a local folder
+  #     - ./files:/data
+  #     # .. or you may split this between different storage points
+  #     # - ./files:/data
+  #     # - /path/to/ssd:/data/uploads
+  #     # - /path/to/large_hdd:/data/media
+  #   depends_on:
+  #     - db
+
+  postgres:
+    image: docker.io/postgres:14-alpine
+    environment:
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      # ensure the database gets created correctly
+      # https://matrix-org.github.io/synapse/latest/postgres.html#set-up-database
+      POSTGRES_INITDB_ARGS: --encoding=UTF-8 --lc-collate=C --lc-ctype=C
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - $PWD/postgres-init.sql:/docker-entrypoint-initdb.d/dbinit.sql
+
+  keycloak:
+    image: docker.io/bitnami/keycloak:latest
+    ports:
+      - "80:8080"
+    environment:
+      KEYCLOAK_CREATE_ADMIN_USER: "true"
+      KEYCLOAK_ADMIN_USER: "${KEYCLOAK_ADMIN_USER}"
+      KEYCLOAK_ADMIN_PASSWORD: "${KEYCLOAK_ADMIN_PASSWORD}"
+      KEYCLOAK_MANAGEMENT_USER: "${KEYCLOAK_MANAGEMENT_USER}"
+      KEYCLOAK_MANAGEMENT_PASSWORD: "${KEYCLOAK_MANAGEMENT_PASSWORD}"
+      KEYCLOAK_DATABASE_HOST: postgres
+      KEYCLOAK_DATABASE_PORT: "5432"
+      KEYCLOAK_DATABASE_NAME: keycloak
+      KEYCLOAK_DATABASE_USER: keycloak_user
+      KEYCLOAK_DATABASE_PASSWORD: "${KEYCLOAK_DB_PASSWORD}"
+      KEYCLOAK_DATABASE_SCHEMA: "public"
+      KEYCLOAK_HTTP_PORT: "8080"
+      # KEYCLOAK_HTTPS_PORT: "8443"
+      KEYCLOAK_BIND_ADDRESS: "0.0.0.0"
+      # KEYCLOAK_ENABLE_TLS: "false"
+      # KEYCLOAK_TLS_KEYSTORE_FILE: ""
+      # KEYCLOAK_TLS_TRUSTSTORE_FILE: ""
+      # KEYCLOAK_TLS_KEYSTORE_PASSWORD: ""
+      # KEYCLOAK_TLS_TRUSTSTORE_PASSWORD: ""
+    depends_on:
+      - postgres
+    # volumes:
+    #   - './mynewtheme:/opt/bitnami/keycloak/themes/mynewtheme'

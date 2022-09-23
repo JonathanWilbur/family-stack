@@ -1,0 +1,11 @@
+https://cloud.HOSTNAME:4443 {
+	reverse_proxy * http://owncloud:8080
+}
+
+https://directory.HOSTNAME:4443 {
+	reverse_proxy * http://directory:18080
+}
+
+https://k.HOSTNAME:4443 {
+	reverse_proxy * http://keycloak:8080
+}
