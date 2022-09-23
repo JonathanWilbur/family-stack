@@ -47,6 +47,7 @@ But the backups are encrypted.
      stack will be exposed to the Internet. Try using `openssl rand -base64 12`
      to generate good passwords.
 6. Run `./install.sh`. In a few minutes, you should have a running stack.
+   - This script is NOT idempotent. Do NOT run it twice or more!
 7. Seed your X.500 Directory with data. See [these](https://wildboar-software.github.io/directory/docs/tutorial01)
    [tutorials](https://wildboar-software.github.io/directory/docs/tutorial02) for
    an idea of how to do this.
