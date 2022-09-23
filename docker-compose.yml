@@ -30,7 +30,7 @@ services:
       - 443:4443
       - 80:8080
     volumes:
-      - $(pwd)/Caddyfile:/etc/caddy/Caddyfile
+      - $PWD/Caddyfile:/etc/caddy/Caddyfile
       # You have to define a persistent volume so that the Let's Encrypt
       # certificates are not deleted between restarts. I got rate-limited by
       # Let's Encrypt, meaning that I have to wait 24 hours to get a new
@@ -291,7 +291,7 @@ services:
     #   - datalayer
     volumes:
       - mysql:/var/lib/mysql
-      - $(pwd)/mysql-init.sql:/docker-entrypoint-initdb.d/dbinit.sql
+      - $PWD/mysql-init.sql:/docker-entrypoint-initdb.d/dbinit.sql
 
   redis:
     image: redis:6
@@ -337,7 +337,7 @@ services:
       POSTGRES_INITDB_ARGS: --encoding=UTF-8 --lc-collate=C --lc-ctype=C
     volumes:
       - postgres:/var/lib/postgresql/data
-      - $(pwd)/postgres-init.sql:/docker-entrypoint-initdb.d/dbinit.sql
+      - $PWD/postgres-init.sql:/docker-entrypoint-initdb.d/dbinit.sql
 
   keycloak:
     image: docker.io/bitnami/keycloak:latest
