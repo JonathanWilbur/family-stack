@@ -41,20 +41,25 @@ But the backups are encrypted.
    `hostnamectl set-hostname your.hostname.com` on SystemD-based systems.
    - This must be done because `sendmail` will refuse to send your backup
      notifications otherwise, and your FQDN is used to populate configuration.
-4. Run `cp example.env .env`.
-5. Configure the app as you'd like in `.env`.
+4. Run `apt install -y git gpg sendmail mailutils`.
+5. Run `cp example.env .env`.
+6. Configure the app as you'd like in `.env`.
    - It is highly recommended that you generate secure passwords if your family
      stack will be exposed to the Internet. Try using `openssl rand -base64 12`
      to generate good passwords.
-6. Run `./install.sh`. In a few minutes, you should have a running stack.
+7. Run `docker run --rm -v $PWD:/asdf --env-file .env --hostname=$(hostname) -w /asdf ubuntu ./install.sh`.
    - This script is NOT idempotent. Do NOT run it twice or more!
-7. Seed your X.500 Directory with data. See [these](https://wildboar-software.github.io/directory/docs/tutorial01)
+8. Run `cp ./family-stack.service /etc/systemd/system/family-stack.service`.
+9. Run `systemctl enable family-stack`.
+10. Run `echo "13 3  * * 0   root    cd $PWD && ./backup.sh" >> /etc/crontab`.
+   - The above runs the backup job every Sunday at 03:13 (server time)
+11. Seed your X.500 Directory with data. See [these](https://wildboar-software.github.io/directory/docs/tutorial01)
    [tutorials](https://wildboar-software.github.io/directory/docs/tutorial02) for
    an idea of how to do this.
-8. Log into OwnCloud as the administrator, download the LDAP plugin from the
+12. Log into OwnCloud as the administrator, download the LDAP plugin from the
    Marketplace, and configure it to use `ldap://directory:1389` as the LDAP
    server.
-9. Log into Keycloak as the administrator, and configure an LDAP identity
+13. Log into Keycloak as the administrator, and configure an LDAP identity
    store that points to `ldap://directory:1389`.
 
 ## TODO
