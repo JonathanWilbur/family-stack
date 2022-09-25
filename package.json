@@ -1,0 +1,19 @@
+{
+  "name": "wilfamnet",
+  "version": "1.0.0",
+  "main": "install.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JonathanWilbur/family-stack.git"
+  },
+  "author": "Jonathan M. Wilbur <jonathan@wilbur.space>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/JonathanWilbur/family-stack/issues"
+  },
+  "homepage": "https://github.com/JonathanWilbur/family-stack#readme",
+  "dependencies": {
+    "@wildboar/x500-cli": "^0.5.2",
+    "dotenv": "^16.0.2"
+  }
+}

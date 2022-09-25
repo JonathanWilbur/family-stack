@@ -10,3 +10,4 @@ hashes.txt
 *.tar.gz.gpg
 backups/*
 !backups/.gitkeep
+node_modules

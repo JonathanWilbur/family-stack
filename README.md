@@ -41,18 +41,14 @@ But the backups are encrypted.
    `hostnamectl set-hostname your.hostname.com` on SystemD-based systems.
    - This must be done because `sendmail` will refuse to send your backup
      notifications otherwise, and your FQDN is used to populate configuration.
-4. Run `apt install -y git gpg sendmail mailutils`.
+4. Run `apt install -y git gpg sendmail mailutils openssl`.
 5. Run `cp example.env .env`.
 6. Configure the app as you'd like in `.env`.
    - It is highly recommended that you generate secure passwords if your family
      stack will be exposed to the Internet. Try using `openssl rand -base64 12`
      to generate good passwords.
-7. Run `docker run --rm -v $PWD:/asdf --env-file .env --hostname=$(hostname) -w /asdf ubuntu ./install.sh`.
-   - This script is NOT idempotent. Do NOT run it twice or more!
-8. Run `cp ./family-stack.service /etc/systemd/system/family-stack.service`.
-9. Run `systemctl enable family-stack`.
-10. Run `echo "13 3  * * 0   root    cd $PWD && ./backup.sh" >> /etc/crontab`.
-   - The above runs the backup job every Sunday at 03:13 (server time)
+7. Run `npm install`.
+8. Run `node ./install.js`.
 11. Seed your X.500 Directory with data. See [these](https://wildboar-software.github.io/directory/docs/tutorial01)
    [tutorials](https://wildboar-software.github.io/directory/docs/tutorial02) for
    an idea of how to do this.
