@@ -20,7 +20,12 @@ Future versions will include support for Synapse, Wekan, CoreDNS, Email
 ## System Requirements
 
 Not known currently, but you will definitely want more than 2 cores and 4 GB of
-memory.
+memory. You will need to install:
+
+- NodeJS
+- NPM
+- Docker
+- Docker Compose (if your version of Docker does not have the `compose` subcommand)
 
 ## Limitations
 
@@ -34,28 +39,26 @@ But the backups are encrypted.
 
 ## Setup
 
-1. Run `gpg --full-generate-key` and follow the prompts to create a GPG key.
-2. Install Docker. New versions of Docker have a `compose` subcommand, but if
-   yours does not, install `docker-compose` separately.
+1. Run `apt install -y git gpg sendmail mailutils openssl`.
+2. Run `gpg --full-generate-key` and follow the prompts to create a GPG key.
 3. Set the Fully-Qualified Domain Name (FQDN) of your server. Use
    `hostnamectl set-hostname your.hostname.com` on SystemD-based systems.
    - This must be done because `sendmail` will refuse to send your backup
      notifications otherwise, and your FQDN is used to populate configuration.
-4. Run `apt install -y git gpg sendmail mailutils openssl`.
-5. Run `cp example.env .env`.
-6. Configure the app as you'd like in `.env`.
+4. Run `cp example.env .env`.
+5. Configure the app as you'd like in `.env`.
    - It is highly recommended that you generate secure passwords if your family
      stack will be exposed to the Internet. Try using `openssl rand -base64 12`
      to generate good passwords.
-7. Run `npm install`.
-8. Run `node ./install.js`.
-11. Seed your X.500 Directory with data. See [these](https://wildboar-software.github.io/directory/docs/tutorial01)
+6. Run `npm install`.
+7. Run `node ./install.js`.
+8. Seed your X.500 Directory with data. See [these](https://wildboar-software.github.io/directory/docs/tutorial01)
    [tutorials](https://wildboar-software.github.io/directory/docs/tutorial02) for
    an idea of how to do this.
-12. Log into OwnCloud as the administrator, download the LDAP plugin from the
+9. Log into OwnCloud as the administrator, download the LDAP plugin from the
    Marketplace, and configure it to use `ldap://directory:1389` as the LDAP
    server.
-13. Log into Keycloak as the administrator, and configure an LDAP identity
+10. Log into Keycloak as the administrator, and configure an LDAP identity
    store that points to `ldap://directory:1389`.
 
 ## TODO

@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Credits to whoever originally posted this on this thread: https://gist.github.com/mihow/9c7f559807069a03e302605691f85572
+set -a
+source <(cat .env | sed -e '/^#/d;/^\s*$/d' -e "s/'/'\\\''/g" -e "s/=\(.*\)/='\1'/g")
+set +a
+
 date=$(date +%Y-%m-%d-%H_%M_%S)
 backup_file_name=$date.backup.tar.gz
 storage_account_name=$AZURE_STORAGE_ACCOUNT_NAME

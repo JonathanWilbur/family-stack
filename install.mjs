@@ -16,7 +16,7 @@ const CREATE_CERTS = [
     "-nodes",
     "-out " + CERT_PATH,
     "-keyout " + KEY_PATH,
-    `-sub /CN=${os.hostname}/`,
+    `-subj /CN=${os.hostname}/`,
 ].join(" ");
 const BACKUP_CRON_JOB_SCHEDULE = "13 3 * * 0"; // Every Sunday at 03:13.
 const BACKUP_CRON_JOB_ACTION = `cd ${process.cwd()} && ./backup.sh`;

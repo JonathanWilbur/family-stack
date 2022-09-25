@@ -72,7 +72,7 @@ services:
       - files:/mnt/data
 
   directory:
-    image: ghcr.io/wildboar-software/meerkat-dsa:1.2.7
+    image: ghcr.io/wildboar-software/meerkat-dsa:${MEERKAT_DSA_VERSION}
     environment:
       # What appears in this section overrides anything in .env.
       DATABASE_URL: mysql://directory_user:${DIRECTORY_DB_PASSWORD}@mariadb:3306/directory
@@ -245,7 +245,7 @@ services:
     labels:
       author: Wildboar Software
       app: meerkat
-      version: "1.2.5"
+      version: "${MEERKAT_DSA_VERSION}"
     # networks:
     #   - datalayer
     ports:
@@ -262,7 +262,7 @@ services:
         condition: service_completed_successfully
 
   init-db:
-    image: ghcr.io/wildboar-software/meerkat-dsa:1.2.5
+    image: ghcr.io/wildboar-software/meerkat-dsa:${MEERKAT_DSA_VERSION}
     environment:
       DATABASE_URL: mysql://directory_user:${DIRECTORY_DB_PASSWORD}@mariadb:3306/directory
     entrypoint: /usr/local/bin/npx
