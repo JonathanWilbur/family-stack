@@ -14,6 +14,10 @@
   "homepage": "https://github.com/JonathanWilbur/family-stack#readme",
   "dependencies": {
     "@wildboar/x500-cli": "^0.5.2",
+    "dockerode": "^3.3.4",
     "dotenv": "^16.0.2"
+  },
+  "devDependencies": {
+    "@types/dockerode": "^3.3.9"
   }
 }

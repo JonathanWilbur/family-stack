@@ -19,7 +19,7 @@ const CREATE_CERTS = [
     `-subj /CN=${os.hostname}/`,
 ].join(" ");
 const BACKUP_CRON_JOB_SCHEDULE = "13 3 * * 0"; // Every Sunday at 03:13.
-const BACKUP_CRON_JOB_ACTION = `cd ${process.cwd()} && ./backup.sh`;
+const BACKUP_CRON_JOB_ACTION = `cd ${process.cwd()} && node ./backup.mjs`;
 
 function main () {
 

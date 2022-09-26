@@ -283,7 +283,7 @@ services:
       MARIADB_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
     command: ["--max-allowed-packet=512M", "--innodb-log-file-size=64M"]
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-u", "owncloud_user", "--password=${MYSQL_ROOT_PASSWORD}"]
+      test: ["CMD", "mysqladmin", "ping", "-u", "root", "--password=${MYSQL_ROOT_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -344,6 +344,17 @@ services:
     # ports:
     #   - "80:8080"
     environment:
+      # This option is needed to ensure Keycloak that a reverse proxy is
+      # handling TLS termination, so you can use "production mode."
+      KEYCLOAK_PROXY: edge
+      # You DO NOT want to enable this, because TLS is terminated by the reverse
+      # proxy.
+      # KEYCLOAK_ENABLE_TLS: "true"
+      # This option seems necessary to avoid getting a this error:
+      # `no suitable driver found for jdbc:postgresql`
+      # See: https://github.com/keycloak/keycloak/issues/10722#issuecomment-1100569045
+      KEYCLOAK_EXTRA_ARGS: "--auto-build"
+      KEYCLOAK_PRODUCTION: "true"
       KEYCLOAK_CREATE_ADMIN_USER: "true"
       KEYCLOAK_ADMIN_USER: "${KEYCLOAK_ADMIN_USER}"
       KEYCLOAK_ADMIN_PASSWORD: "${KEYCLOAK_ADMIN_PASSWORD}"
