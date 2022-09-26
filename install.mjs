@@ -66,7 +66,10 @@ function main () {
         const crontabContents = fs.readFileSync("/etc/crontab", { encoding: "utf-8" });
         if (crontabContents.indexOf(BACKUP_CRON_JOB_ACTION) === -1) {
             // echo "13 3  * * 0   root    cd $PWD && ./backup.sh" >> /etc/crontab
-            fs.appendFileSync(`\n# Backup job for the family-stack\n${BACKUP_CRON_JOB_SCHEDULE} root ${BACKUP_CRON_JOB_ACTION}\n`);
+            fs.appendFileSync(
+                "/etc/crontab",
+                `\n# Backup job for the family-stack\n${BACKUP_CRON_JOB_SCHEDULE} root ${BACKUP_CRON_JOB_ACTION}\n`,
+            );
         }
 
         try {
